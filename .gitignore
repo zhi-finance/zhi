@@ -1,0 +1,33 @@
+# secrets
+.env
+.env.*
+!.env.example
+**/.env.local
+
+# dependencies / builds
+**/node_modules/
+web/.next/
+web/next-env.d.ts
+harness/target/
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/1439/dry-run/
+
+# runtime state
+logs/
+state/
+reports/
+.vault
+.agent.log
+
+# demo build artifacts (frames, renders, audio)
+demo/out/
+*.mp4
+*.wav
+*.aiff
+
+# tooling
+.claude/
+.vercel
+.DS_Store
+*.tsbuildinfo
