@@ -1,0 +1,29 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+evm_version = "shanghai"   # Injective EVM target (matches InjectiveLabs/solidity-contracts)
+optimizer = true
+optimizer_runs = 1
+via_ir = true
+remappings = [
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "forge-std/=lib/forge-std/src/",
+]
+fs_permissions = [{ access = "read-write", path = "./deployments" }]
+
+[fuzz]
+runs = 512
+
+[invariant]
+runs = 128
+depth = 64
+fail_on_revert = false
+
+[rpc_endpoints]
+injective_testnet = "https://k8s.testnet.json-rpc.injective.network"
+injective_mainnet = "https://sentry.evm-rpc.injective.network"
+
+[lint]
+lint_on_build = false
