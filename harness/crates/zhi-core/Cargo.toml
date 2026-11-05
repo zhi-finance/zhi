@@ -1,0 +1,15 @@
+[package]
+name = "zhi-core"
+description = "Deterministic core of the Zhi harness: rule tree DSL, fixed-point indicators, Synth gate, intent sizing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tiny-keccak.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+alloy-sol-types = "1"
+alloy-primitives = "1"
