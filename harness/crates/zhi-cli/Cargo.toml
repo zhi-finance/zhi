@@ -1,0 +1,23 @@
+[package]
+name = "zhi-cli"
+description = "Zhi harness: run, replay, backtest, score and attest Zhi agents on Injective EVM"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "zhi"
+path = "src/main.rs"
+
+[dependencies]
+zhi-core = { path = "../zhi-core" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+hex.workspace = true
+alloy = { version = "2", features = ["provider-http", "signer-local", "sol-types", "contract", "rpc-types", "network", "reqwest"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "signal", "fs"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+clap = { version = "4", features = ["derive", "env"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
