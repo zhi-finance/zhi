@@ -1,0 +1,51 @@
+{
+  "schema": "zhi.ruletree/1.0",
+  "agent": {
+    "registry": "eip155:1439:0x8004A818BFB912233c491871b3d84c89A494BD9e",
+    "agentId": null
+  },
+  "source": {
+    "type": "natural_language",
+    "inputHash": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658",
+    "compiledAt": "2026-11-10T13:00:00Z",
+    "compiler": "zhi-compiler/1.0"
+  },
+  "market": {
+    "ticker": "BTC/USDC PERP",
+    "marketId": "0xfd704649cf3a516c0c145ab0111717c44640d8dbe52a462ae35cadf2f6df1515",
+    "type": "derivative",
+    "class": "crypto"
+  },
+  "timeframe": "1m",
+  "entry": {
+    "side": "short",
+    "all": [
+      {
+        "ind": "SPREAD_BPS",
+        "op": "lte",
+        "value": 200
+      }
+    ]
+  },
+  "synthGate": null,
+  "sizing": {
+    "model": "pct_equity",
+    "pct": 10,
+    "maxNotionalUsd": 2500,
+    "leverage": 3
+  },
+  "exit": {
+    "takeProfitPct": 3.0,
+    "stopLossPct": 1.5,
+    "maxHoldSec": 86400,
+    "orderTypes": {
+      "tp": "limit_post_only",
+      "sl": "market_with_worst_price"
+    }
+  },
+  "risk": {
+    "maxDailyDrawdownPct": 4,
+    "maxSlippageBps": 35,
+    "cooldownSec": 180
+  }
+}
