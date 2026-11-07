@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/* Zhi — ink and paper, with a single vermilion seal (朱印).
+   The seal is the brand: it means "signed and approved". It is used for the mark, the stamp
+   and blocked trades only. Everything else is monochrome. Contrast: muted on bg >= 4.6:1. */
+:root {
+  color-scheme: dark;
+  --background: #0b0b0b;
+  --surface: #111111;
+  --surface-2: #181818;
+  --foreground: #ededea;
+  --muted-foreground: #8f8f8a;
+  --faint: #5c5c58;
+  --border: #232323;
+  --border-strong: #333331;
+  --seal: #e2492f; /* vermilion */
+  --seal-soft: #2a1410;
+  --ok: #7fcf9e; /* executed / healthy (desaturated) */
+  --ok-soft: #12201a;
+  --warn: #d9b46a;
+  --warn-soft: #231d10;
+  --ring: #ededea;
+
+  /* legacy aliases used by app components */
+  --accent: var(--foreground);
+  --accent-foreground: var(--background);
+  --accent-soft: #1d1d1d;
+  --danger: var(--seal);
+  --danger-soft: var(--seal-soft);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted-foreground);
+  --color-faint: var(--faint);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-seal: var(--seal);
+  --color-seal-soft: var(--seal-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* italic serif accent words inside sans headlines */
+.serif {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* numbered mono section labels: "01 — HOW IT WORKS" */
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--seal);
+  color: #fff;
+}
+
+/* hairline dotted field, very subtle */
+.dots {
+  background-image: radial-gradient(color-mix(in oklab, var(--foreground) 9%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* the paper-grain overlay keeps flat blacks from looking digital */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in {
+    animation: fade-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pulse-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .marquee {
+    animation: marquee var(--marquee-duration, 60s) linear infinite;
+  }
+  .caret::after {
+    content: "▍";
+    margin-left: 2px;
+    animation: pulse-dot 1s steps(1) infinite;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* range inputs: thin monochrome track, round thumb */
+input[type="range"].range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+input[type="range"].range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--foreground);
+  border: 3px solid var(--background);
+  box-shadow: 0 0 0 1px var(--foreground);
+  cursor: pointer;
+}
+input[type="range"].range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--foreground);
+  border: 2px solid var(--background);
+  cursor: pointer;
+}
+input[type="range"].range[data-bad="true"]::-webkit-slider-thumb {
+  background: var(--seal);
+  box-shadow: 0 0 0 1px var(--seal);
+}
