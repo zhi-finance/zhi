@@ -1,0 +1,49 @@
+{
+  "name": "zhi-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "sync": "node scripts/sync-abi.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "@react-three/postprocessing": "^3.2.2",
+    "@tanstack/react-query": "^5.107.1",
+    "lenis": "^1.3.27",
+    "lightweight-charts": "^5.2.1",
+    "lucide-react": "^1.70.0",
+    "motion": "^14.11.0",
+    "next": "16.4.5",
+    "postprocessing": "^6.39.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "three": "^0.187.0",
+    "viem": "^2.57.17",
+    "wagmi": "^3.7.11",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.187.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
