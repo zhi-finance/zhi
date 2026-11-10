@@ -8,12 +8,13 @@ import { useState } from "react";
 import { ConnectButton } from "./connect-button";
 import { SealMark } from "./fx/seal-mark";
 
-export const isAppPath = (p: string) => ["/markets", "/terminal", "/agents", "/portfolio"].some((x) => p.startsWith(x));
+export const isAppPath = (p: string) => ["/markets", "/terminal", "/agents", "/portfolio", "/pitch"].some((x) => p.startsWith(x));
 
 const links = [
   { href: "/#how", label: "How it works" },
   { href: "/#playground", label: "Playground" },
   { href: "/agents", label: "Agents" },
+  { href: "/pitch", label: "Pitch Deck" },
   { href: "/docs", label: "Docs" },
 ];
 

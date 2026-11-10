@@ -6,7 +6,7 @@ import { SealMark } from "./fx/seal-mark";
 import { isAppPath } from "./nav";
 
 const FOOT = [
-  { t: "Product", l: [["Launch app", "/terminal"], ["Live agents", "/agents"], ["Playground", "/#playground"], ["Docs", "/docs"]] },
+  { t: "Product", l: [["Launch app", "/terminal"], ["Pitch deck", "/pitch"], ["Live agents", "/agents"], ["Playground", "/#playground"], ["Docs", "/docs"]] },
   { t: "Network", l: [["Injective testnet faucet", "https://testnet.faucet.injective.network"], ["Block explorer", "https://testnet.blockscout.injective.network"], ["Synth · SN50", "https://synthdata.co"]] },
   { t: "Standards", l: [["ERC-8004", "https://eips.ethereum.org/EIPS/eip-8004"], ["Injective precompiles", "https://github.com/InjectiveLabs/solidity-contracts"]] },
 ];
