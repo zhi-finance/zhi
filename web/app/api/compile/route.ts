@@ -63,7 +63,6 @@ async function assertPublic(url: URL) {
 async function fetchUrlText(raw: string): Promise<string> {
   let url = new URL(raw);
   let res: Response | null = null;
-  // follow at most 3 redirects, re-checking every hop
   for (let hop = 0; hop < 4; hop++) {
     await assertPublic(url);
     res = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(8000), headers: { "user-agent": "zhi-compiler/1.0" } });
@@ -85,6 +84,110 @@ async function fetchUrlText(raw: string): Promise<string> {
     .trim();
   if (text.length < 40) throw new Error("the page had no readable text (X posts and videos often need the text pasted in)");
   return text;
+}
+
+// Sanitize draft so any missing or unexpected fields are safely defaulted
+function sanitizeDraft(d: unknown): Draft {
+  const obj = typeof d === "object" && d !== null ? (d as Record<string, unknown>) : {};
+  const synth = typeof obj.synth === "object" && obj.synth !== null ? (obj.synth as Record<string, unknown>) : {};
+  const sizing = typeof obj.sizing === "object" && obj.sizing !== null ? (obj.sizing as Record<string, unknown>) : {};
+  const exit = typeof obj.exit === "object" && obj.exit !== null ? (obj.exit as Record<string, unknown>) : {};
+  const risk = typeof obj.risk === "object" && obj.risk !== null ? (obj.risk as Record<string, unknown>) : {};
+
+  return {
+    side: obj.side === "long" || obj.side === "short" ? obj.side : null,
+    timeframe: typeof obj.timeframe === "string" ? (obj.timeframe as Draft["timeframe"]) : null,
+    conditions: Array.isArray(obj.conditions) ? (obj.conditions as Draft["conditions"]) : [],
+    synth: {
+      enabled: typeof synth.enabled === "boolean" ? synth.enabled : null,
+      horizon: synth.horizon === "1h" || synth.horizon === "24h" ? synth.horizon : null,
+      minDirectionProb: typeof synth.minDirectionProb === "number" ? synth.minDirectionProb : null,
+      maxBand90Bps: typeof synth.maxBand90Bps === "number" ? synth.maxBand90Bps : null,
+    },
+    sizing: {
+      model: sizing.model === "pct_equity" || sizing.model === "fixed_usd" ? sizing.model : null,
+      pct: typeof sizing.pct === "number" ? sizing.pct : null,
+      usd: typeof sizing.usd === "number" ? sizing.usd : null,
+      maxNotionalUsd: typeof sizing.maxNotionalUsd === "number" ? sizing.maxNotionalUsd : null,
+      leverage: typeof sizing.leverage === "number" ? sizing.leverage : null,
+    },
+    exit: {
+      takeProfitPct: typeof exit.takeProfitPct === "number" ? exit.takeProfitPct : null,
+      stopLossPct: typeof exit.stopLossPct === "number" ? exit.stopLossPct : null,
+      maxHoldSec: typeof exit.maxHoldSec === "number" ? exit.maxHoldSec : null,
+      tp: exit.tp === "limit_post_only" || exit.tp === "market" ? exit.tp : null,
+    },
+    risk: {
+      maxDailyDrawdownPct: typeof risk.maxDailyDrawdownPct === "number" ? risk.maxDailyDrawdownPct : null,
+      maxSlippageBps: typeof risk.maxSlippageBps === "number" ? risk.maxSlippageBps : null,
+      cooldownSec: typeof risk.cooldownSec === "number" ? risk.cooldownSec : null,
+    },
+    evidence: Array.isArray(obj.evidence) ? (obj.evidence as Draft["evidence"]) : [],
+    ignoredInstructions: Array.isArray(obj.ignoredInstructions) ? (obj.ignoredInstructions as string[]) : [],
+    summary: typeof obj.summary === "string" ? obj.summary : "Strategy compiled successfully.",
+  };
+}
+
+/** Fallback compiler using Google Gemini (Free Tier available at aistudio.google.com). */
+async function compileWithGemini(
+  content: string,
+  sourceType: string,
+  market: MarketChoice,
+  apiKey: string,
+): Promise<Draft> {
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+  const userPrompt = `Market: ${market.ticker} (${market.class}).\n<thesis source="${sourceType}">\n${content}\n</thesis>\n\nStrictly output valid JSON matching the Zhi draft schema.`;
+
+  const payload = {
+    system_instruction: {
+      parts: [
+        {
+          text: `${SYSTEM}\n\nSTRICT JSON OUTPUT FORMAT:\n${JSON.stringify(DRAFT_SCHEMA)}`,
+        },
+      ],
+    },
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: userPrompt }],
+      },
+    ],
+    generationConfig: {
+      response_mime_type: "application/json",
+      temperature: 0.1,
+    },
+  };
+
+  let lastError: Error | null = null;
+  for (const m of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(28000),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        throw new Error(`Gemini ${m} HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      }
+
+      const data = await res.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error(`Gemini ${m} returned empty candidates`);
+
+      const cleanJson = rawText.replace(/^```json\s*/i, "").replace(/\s*```$/, "").trim();
+      const parsed = JSON.parse(cleanJson);
+      return sanitizeDraft(parsed);
+    } catch (e) {
+      lastError = e as Error;
+      // try next model
+    }
+  }
+
+  throw lastError ?? new Error("Gemini compilation failed on all models");
 }
 
 interface Body {
@@ -125,42 +228,73 @@ export async function POST(req: Request) {
   }
   const inputHash = hashText(content);
 
-  if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
-    return Response.json({ error: "compiler offline: set ANTHROPIC_API_KEY on the server, or start from a template" }, { status: 503 });
+  const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+  const geminiKey = process.env.GEMINI_API_KEY;
+
+  if (!hasAnthropic && !geminiKey) {
+    return Response.json(
+      { error: "compiler offline: set GEMINI_API_KEY (free tier at aistudio.google.com) or ANTHROPIC_API_KEY on the server, or start from a template" },
+      { status: 503 },
+    );
   }
 
-  const client = new Anthropic();
   const started = Date.now();
-  let draft: Draft;
-  try {
-    const msg = await client.beta.messages.create({
-      model: "claude-opus-5-5",
-      max_tokens: 8000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "low", format: { type: "json_schema", schema: DRAFT_SCHEMA as unknown as Record<string, unknown> } },
-      system: SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: `Market: ${body.market.ticker} (${body.market.class}).\n<thesis source="${sourceType}">\n${content}\n</thesis>`,
-        },
-      ],
-    });
-    if (msg.stop_reason === "refusal") {
-      return Response.json({ error: "the model declined to compile this input" }, { status: 422 });
+  let draft: Draft | null = null;
+  let providerUsed = "anthropic";
+
+  // 1. Try Anthropic Claude if key is configured
+  if (hasAnthropic) {
+    try {
+      const client = new Anthropic();
+      const msg = await client.beta.messages.create({
+        model: "claude-opus-5-5",
+        max_tokens: 8000,
+        betas: ["server-side-fallback-2026-07-01"],
+        fallbacks: "default",
+        output_config: { effort: "low", format: { type: "json_schema", schema: DRAFT_SCHEMA as unknown as Record<string, unknown> } },
+        system: SYSTEM,
+        messages: [
+          {
+            role: "user",
+            content: `Market: ${body.market.ticker} (${body.market.class}).\n<thesis source="${sourceType}">\n${content}\n</thesis>`,
+          },
+        ],
+      });
+      if (msg.stop_reason === "refusal") {
+        return Response.json({ error: "the model declined to compile this input" }, { status: 422 });
+      }
+      if (msg.stop_reason === "max_tokens") {
+        return Response.json({ error: "compiler output was cut off; shorten the input" }, { status: 422 });
+      }
+      const text = msg.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
+      draft = sanitizeDraft(JSON.parse(text));
+    } catch (e) {
+      // If Anthropic fails (e.g. rate limit, no credits, 400/401/402/429/500) and Gemini is available, fall back seamlessly
+      if (geminiKey) {
+        // Fall through to Gemini
+        draft = null;
+      } else {
+        if (e instanceof Anthropic.RateLimitError) return Response.json({ error: "compiler is rate limited; retry in a moment" }, { status: 429 });
+        if (e instanceof Anthropic.AuthenticationError) return Response.json({ error: "compiler API key rejected; set GEMINI_API_KEY as fallback" }, { status: 503 });
+        if (e instanceof Anthropic.APIError) return Response.json({ error: `compiler error: ${e.message}; set GEMINI_API_KEY as fallback` }, { status: 502 });
+        if (e instanceof SyntaxError) return Response.json({ error: "compiler returned malformed output; rejected" }, { status: 502 });
+        throw e;
+      }
     }
-    if (msg.stop_reason === "max_tokens") {
-      return Response.json({ error: "compiler output was cut off; shorten the input" }, { status: 422 });
+  }
+
+  // 2. Fall back to Gemini Free Tier if Claude wasn't used or failed
+  if (!draft && geminiKey) {
+    providerUsed = "gemini";
+    try {
+      draft = await compileWithGemini(content, sourceType, body.market, geminiKey);
+    } catch (e) {
+      return Response.json({ error: `Gemini fallback compilation error: ${(e as Error).message}` }, { status: 502 });
     }
-    const text = msg.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-    draft = JSON.parse(text) as Draft;
-  } catch (e) {
-    if (e instanceof Anthropic.RateLimitError) return Response.json({ error: "compiler is rate limited; retry in a moment" }, { status: 429 });
-    if (e instanceof Anthropic.AuthenticationError) return Response.json({ error: "compiler API key rejected" }, { status: 503 });
-    if (e instanceof Anthropic.APIError) return Response.json({ error: `compiler error: ${e.message}` }, { status: 502 });
-    if (e instanceof SyntaxError) return Response.json({ error: "compiler returned malformed output; rejected" }, { status: 502 });
-    throw e;
+  }
+
+  if (!draft) {
+    return Response.json({ error: "compilation failed across all available model providers" }, { status: 502 });
   }
 
   const result = buildTree(
@@ -170,5 +304,11 @@ export async function POST(req: Request) {
     { type: sourceType, inputHash, compiledAt: new Date().toISOString().replace(/\.\d{3}Z$/, "Z") },
     `eip155:1439:${IDENTITY_REGISTRY}`,
   );
-  return Response.json({ ...result, inputHash, source: content.slice(0, 4000), compileMs: Date.now() - started });
+  return Response.json({
+    ...result,
+    inputHash,
+    source: content.slice(0, 4000),
+    compileMs: Date.now() - started,
+    provider: providerUsed,
+  });
 }
