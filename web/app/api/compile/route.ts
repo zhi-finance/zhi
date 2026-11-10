@@ -135,7 +135,14 @@ async function compileWithGemini(
   market: MarketChoice,
   apiKey: string,
 ): Promise<Draft> {
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+  const customModel = process.env.GEMINI_MODEL;
+  const models = [
+    ...(customModel ? [customModel] : []),
+    "gemini-3.8-flash",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+  ];
   const userPrompt = `Market: ${market.ticker} (${market.class}).\n<thesis source="${sourceType}">\n${content}\n</thesis>\n\nStrictly output valid JSON matching the Zhi draft schema.`;
 
   const payload = {
