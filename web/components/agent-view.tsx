@@ -12,6 +12,7 @@ import { fetchVaultEvents, type VaultEvent } from "@/lib/events";
 import { ago, errMsg, fx, num, short, usd } from "@/lib/format";
 import { guardrailVaultAbi, zhiAttestorAbi } from "@/lib/generated";
 import { hashRuleTree } from "@/lib/ruletree/canonical";
+import { AgentAnalyticsChart } from "./agent-analytics-chart";
 import { wagmiConfig } from "./providers";
 import { describeCondition } from "./terminal/tree-preview";
 import { Badge, Button, Card, CardHeader, Empty, ErrorBox, Field, Skeleton, Stat, inputCls } from "./ui";
@@ -99,6 +100,21 @@ export function AgentView({ vault }: { vault: Hex }) {
           <Stat label="Last entry" value={Number(v.lastEntryAt) ? ago(Number(v.lastEntryAt)) : "never"} hint={v.isFlat ? "flat" : "position open"} />
         </dl>
       </Card>
+
+      <AgentAnalyticsChart
+        vault={vault}
+        agentId={agentId}
+        card={card.data}
+        equity={equity}
+        epochStartEquity={start}
+        dd={dd}
+        ddLimit={ddLimit}
+        events={events.data}
+        bounds={b}
+        frozen={frozen}
+        score={score}
+        adherence={adherence}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <Card>
