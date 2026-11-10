@@ -33,10 +33,11 @@ export const metadata: Metadata = {
   publisher: "Zhi Finance",
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/icon.png", sizes: "512x512", type: "image/png" },
-      { url: "/favicon.ico" },
     ],
+    shortcut: "/favicon.ico",
     apple: [
       { url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" },
     ],

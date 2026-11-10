@@ -1,6 +1,22 @@
-# Zhi 智
+<p align="center">
+  <a href="https://zhifi.vercel.app">
+    <img src="web/public/icon.png" width="104" height="104" alt="Zhi 智 Logo" />
+  </a>
+</p>
 
-**The model plans once. The subnet verifies. The chain enforces.**
+<h1 align="center">Zhi 智</h1>
+
+<p align="center">
+  <strong>The model plans once. The subnet verifies. The chain enforces.</strong><br>
+  <em>The safe execution layer for autonomous AI trading agents on Injective EVM.</em>
+</p>
+
+<p align="center">
+  <a href="https://zhifi.vercel.app"><img src="https://img.shields.io/badge/App-zhifi.vercel.app-e2492f?style=flat-square" alt="Zhi App" /></a>
+  <a href="https://testnet.blockscout.injective.network"><img src="https://img.shields.io/badge/Injective_EVM-Testnet_1439-00F2FE?style=flat-square" alt="Injective EVM" /></a>
+  <a href="https://github.com/opentensor/bittensor"><img src="https://img.shields.io/badge/Bittensor-Synth_SN50-2f80ed?style=flat-square" alt="Bittensor Synth SN50" /></a>
+  <a href="https://eips.ethereum.org/EIPS/eip-8004"><img src="https://img.shields.io/badge/Standard-ERC--8004-d9b46a?style=flat-square" alt="ERC-8004" /></a>
+</p>
 
 Zhi is the safe execution layer for AI trading agents on Injective. An LLM compiles a trading thesis once into a signed, schema-bounded rule tree; a deterministic Rust harness evaluates it on Injective market data; Bittensor **Synth (SN50)** must agree before any entry; and an on-chain **Guardrail Vault** on Injective EVM enforces risk limits no prompt can override, trading the native orderbook through the exchange precompile. Every fill and skip becomes ERC-8004 reputation evidence.
 
