@@ -1,0 +1,46 @@
+{
+  "title": "Zhi \u2014 trading agents bound by the chain",
+  "voice": "confident young woman, 20-25, warm but sharp, slightly amused, fast-paced",
+  "scenes": [
+    {
+      "id": "cold-open",
+      "visual": "title card: black, the \u667a seal stamps in, wordmark ZHI",
+      "vo": "AI trading agents are fast. Tireless. And one bad prompt away from blowing up your account."
+    },
+    {
+      "id": "hero",
+      "visual": "landing hero, carved seal rotating, cursor types an idea",
+      "vo": "Meet Zhi. You describe a strategy in plain words. An AI writes it into rules, once. You sign them. And from that moment, a smart contract on Injective enforces every single limit."
+    },
+    {
+      "id": "layers",
+      "visual": "scroll through How it works: compile, Synth gate, vault panels",
+      "vo": "The model plans. Bittensor's Synth network verifies every entry. And the chain enforces. Three layers, and each one trusts nothing above it."
+    },
+    {
+      "id": "playground",
+      "visual": "Playground: click Prompt-injected 20x, Fat-finger, Down 5% today",
+      "vo": "So go ahead. Try to break it. Prompt-inject twenty-x leverage? Blocked. Fat-finger nine thousand dollars? Blocked. Lose five percent in a day? The vault freezes itself. And anyone, anywhere, can pull that brake."
+    },
+    {
+      "id": "markets",
+      "visual": "Markets terminal: search TSLA, then BTC, chart, order book, agent panel",
+      "vo": "This is the Zhi terminal. Three hundred and fifty live Injective markets. Real charts. The real on-chain order book. Pick a market, go short, set your leverage and your stop, and build."
+    },
+    {
+      "id": "launch",
+      "visual": "Launch page: rule tree preview with provenance flags, hash, deploy panel",
+      "vo": "Every rule, in plain English. Green came from you. Amber is a safe default. Red got capped. One signature, and your vault and its on-chain identity go live on Injective."
+    },
+    {
+      "id": "evidence",
+      "visual": "Leaderboard, agent page: bounds, evidence feed, poke button",
+      "vo": "And this is real. Our agent just checked every bound, and placed its order on Injective, live. Every trade, and every skipped trade, lands on-chain as evidence. That evidence becomes a Zhi Score. And the score unlocks capital."
+    },
+    {
+      "id": "outro",
+      "visual": "seal stamps, tagline, URL",
+      "vo": "The model plans. The subnet verifies. The chain enforces. This is Zhi. Build your agent today, on Injective."
+    }
+  ]
+}
