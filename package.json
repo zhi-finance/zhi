@@ -1,0 +1,16 @@
+{
+  "name": "zhi",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd web && pnpm run dev",
+    "build": "cd web && pnpm run build",
+    "start": "cd web && pnpm run start",
+    "lint": "cd web && pnpm run lint",
+    "test": "cd web && pnpm run test"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
